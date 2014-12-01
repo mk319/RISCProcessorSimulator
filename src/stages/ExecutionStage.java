@@ -21,7 +21,6 @@ public class ExecutionStage implements Callable<ExecuteMemoryBuffer>
   public ExecuteMemoryBuffer call() throws Exception
   {
     running = true;
-    //TODO: Implement ExecutionStage
     ExecuteMemoryBuffer outBuffer = ExecuteMemoryBuffer.getInstance();
 
     //for testing show which instruction is being executed
@@ -33,7 +32,7 @@ public class ExecutionStage implements Callable<ExecuteMemoryBuffer>
     int signExtended = decodeExecuteBuffer.readSignExtendedBytes();
 
     outBuffer.writeIncrementedPcWithOffset(incrementedPc + signExtended);
-    
+
     //ALU Control
     int functionCode = decodeExecuteBuffer.readSignExtendedBytes() & 0x0007;
 

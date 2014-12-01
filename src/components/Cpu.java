@@ -1,8 +1,11 @@
 package components;
 
 import java.io.BufferedReader;
+import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -104,6 +107,7 @@ public class Cpu
       //start new write back stage
       writeBackFuture = pool.submit(new WriteBackStage(memoryFuture.get()));
       writeBackFuture.get();
+      printState();
     }
     pool.shutdown();
     try
@@ -114,6 +118,43 @@ public class Cpu
       e.printStackTrace();
     }
 
+  }
+
+  public static void printState()
+  {
+    //this method assumes memory is always larger than the register file
+    Memory memory = Memory.getInstance();
+    RegisterFile registerFile = RegisterFile.getInstance();
+    PrintWriter writer = null;
+    try
+    {
+      writer = new PrintWriter("debug.log", "UTF-8");
+    writer.println("PC = " + reg.getPc());
+    writer.print("--------------------\t\t\t"); writer.println("--------------------");
+    writer.print("| Memory Locations |\t\t\t"); writer.println("|   Register File  |");
+    writer.print("--------------------\t\t\t"); writer.println("--------------------");
+    writer.print("| Location | Value |\t\t\t"); writer.println("| Location | Value |");
+    for(int i=0; i<mem.getMemorySize();++i)
+    {
+      writer.format("|     [%2x] | 0x%-4x|\t\t\t",i,memory.getMemory(i));
+      if(i<registerFile.getRegisterFileSize())
+      {
+        writer.format("|     [%2x] | 0x%-4x|%n",i,registerFile.getRegister(i));
+      }
+      else
+      {
+        writer.format("%n");
+      }
+    }
+
+    } catch (FileNotFoundException | UnsupportedEncodingException e)
+    {
+      e.printStackTrace();
+    } finally
+    {
+      if(writer != null)
+      writer.close();
+    }
   }
 
   private static ArrayList<Integer> loadInstructions()

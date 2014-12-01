@@ -19,7 +19,7 @@ public class Alu
     switch (aluControlCode)
     {
       case ALU_SLL: //sll
-        return operand1 << operand2;
+        return operand1 << 4;
 
       case ALU_SRA: //sra
         return operand1 >> operand2;

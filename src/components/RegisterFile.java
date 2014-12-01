@@ -11,6 +11,7 @@ public class RegisterFile
   private RegisterFile()
   {
     registers = new int[REGISTER_FILE_SIZE];
+    pc = 0;
     for (int i = 0; i < REGISTER_FILE_SIZE; i++)
     {
       registers[i] = 0x00;
