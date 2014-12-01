@@ -25,9 +25,7 @@ public class Cpu
   private static Memory       mem;
   private static RegisterFile reg;
 
-  private static int clockCycleCount = 0;
-
-  private static final String INSTRUCTIONS_FILE       = "src\\Instructions.code";
+  private static final String INSTRUCTIONS_FILE = "src\\Instructions.code";
   private static final String DEBUG_INSTRUCTIONS_FILE = "src\\Test.code";
 
   private static boolean PCSrc = false;
@@ -54,82 +52,68 @@ public class Cpu
   @SuppressWarnings("StatementWithEmptyBody")
   public static void execute() throws ExecutionException, InterruptedException
   {
+
+    ExecutorService pool = Executors.newFixedThreadPool(5);
+    Future<FetchDecodeBuffer> fetchFuture = null;
+    Future<DecodeExecuteBuffer> decodeFuture = null;
+    Future<ExecuteMemoryBuffer> executeFuture = null;
+    Future<MemoryWriteBackBuffer> memoryFuture = null;
+    Future<Void> writeBackFuture = null;
+
     //execution is complete when the PC is larger than the number of instructions
+
     while (reg.getPc() != mem.getInstructionMemorySize())
     {
-      switch (clockCycleCount++)
+      //Each stage is submitted to the thread pool. The future is then saved and passed to the next
+      //thread. This means that the next thread will now wait for the result of previous thread
+      // before it executes.
+      //The empty while loop is to make sure that thread is not currently executing before
+      // executing the next instruction
+
+      //wait for fetch stage to be free
+      while (FetchStage.isRunning())
       {
-        case 0:
-          FetchStage.execute();
-          break;
-        case 1:
-          DecodeStage.execute();
-          HazardDetectionUnit.decodeHazard();
-
-          FetchStage.execute();
-          break;
-        case 2:
-          ExecutionStage.execute();
-
-          DecodeStage.execute();
-          HazardDetectionUnit.decodeHazard();
-
-          FetchStage.execute();;
-          break;
-        case 3:
-          MemoryStage.execute();
-          ForwardingUnit.exeMemHazardCheck();
-          ForwardingUnit.memWbHazardCheck();
-
-          ExecutionStage.execute();
-
-
-          DecodeStage.execute();
-          HazardDetectionUnit.decodeHazard();
-
-          FetchStage.execute();
-          break;
-        default:
-          WriteBackStage.execute();
-
-          MemoryStage.execute();
-          ForwardingUnit.exeMemHazardCheck();
-          ForwardingUnit.memWbHazardCheck();
-
-          ExecutionStage.execute();
-
-          DecodeStage.execute();
-          HazardDetectionUnit.decodeHazard();
-
-          FetchStage.execute();
-          break;
       }
+      //start new fetch stage
+      fetchFuture = pool.submit(new FetchStage());
+
+      //wait for decode stage to be free
+      while (DecodeStage.isRunning())
+      {
+      }
+      decodeFuture = pool.submit(new DecodeStage(fetchFuture.get()));
+
+      //wait for execution stage to be free
+      while (ExecutionStage.isRunning())
+      {
+      }
+      //start new execution stage
+      executeFuture = pool.submit(new ExecutionStage(decodeFuture.get()));
+
+      //wait for memory stage to be free
+      while (MemoryStage.isRunning())
+      {
+      }
+      //start new memory stage
+      memoryFuture = pool.submit(new MemoryStage(executeFuture.get()));
+
+      //wait for write back stage to be free
+      while (WriteBackStage.isRunning())
+      {
+      }
+      //start new write back stage
+      writeBackFuture = pool.submit(new WriteBackStage(memoryFuture.get()));
+      writeBackFuture.get();
+    }
+    pool.shutdown();
+    try
+    {
+      pool.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+    }catch(InterruptedException e)
+    {
+      e.printStackTrace();
     }
 
-    //finish out instructions currently in pipeline
-    WriteBackStage.execute();
-
-    MemoryStage.execute();
-    ForwardingUnit.exeMemHazardCheck();
-    ForwardingUnit.memWbHazardCheck();
-
-    ExecutionStage.execute();
-
-    DecodeStage.execute();
-    HazardDetectionUnit.decodeHazard();
-
-
-    WriteBackStage.execute();
-    MemoryStage.execute();
-    ForwardingUnit.exeMemHazardCheck();
-    ForwardingUnit.memWbHazardCheck();
-
-    ExecutionStage.execute();
-
-    WriteBackStage.execute();
-    MemoryStage.execute();
-
-    WriteBackStage.execute();
   }
 
   private static ArrayList<Integer> loadInstructions()

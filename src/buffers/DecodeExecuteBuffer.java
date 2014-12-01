@@ -18,8 +18,6 @@ public class DecodeExecuteBuffer
   private int rd;
   //instruction [6-9]
   private int rt;
-  //instruction [10-12]
-  private int rs;
 
   //CONTROL SIGNALS
   //EX
@@ -34,6 +32,7 @@ public class DecodeExecuteBuffer
   private boolean jump;
   private boolean memWrite;
   private boolean memRead;
+  private int jumpAddress;
 
   //WB
   private boolean memToReg;
@@ -108,16 +107,6 @@ public class DecodeExecuteBuffer
   public void writeRt(int rt)
   {
     this.rt = rt;
-  }
-
-  public int readRs()
-  {
-    return rs;
-  }
-
-  public void writeRs(int rs)
-  {
-    this.rs = rs;
   }
 
   public boolean readAluSrc()
@@ -228,5 +217,15 @@ public class DecodeExecuteBuffer
   public void writeJump(boolean jump)
   {
     this.jump = jump;
+  }
+
+  public int readJumpAddress()
+  {
+    return jumpAddress;
+  }
+
+  public void writeJumpAddress(int jumpAddress)
+  {
+    this.jumpAddress = jumpAddress;
   }
 }

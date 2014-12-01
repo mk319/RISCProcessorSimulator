@@ -6,7 +6,7 @@ import buffers.DecodeExecuteBuffer;
 import buffers.FetchDecodeBuffer;
 import components.RegisterFile;
 
-public class DecodeStage
+public class DecodeStage implements Callable<DecodeExecuteBuffer>
 {
   private static boolean running = false;
 
@@ -27,14 +27,19 @@ public class DecodeStage
   private static final int OPCODE_SLTI       = 0b0011;
   private static final int OPCODE_JMP        = 0b1111;
 
-  private static DecodeExecuteBuffer outBuffer ;
 
+  private final FetchDecodeBuffer   fetchDecodeBuffer;
+  private       DecodeExecuteBuffer outBuffer;
 
-  public static void execute()
+  public DecodeStage(FetchDecodeBuffer fetchDecodeBuffer)
+  {
+    this.fetchDecodeBuffer = fetchDecodeBuffer;
+  }
+
+  @Override
+  public DecodeExecuteBuffer call() throws Exception
   {
     running = true;
-    FetchDecodeBuffer   fetchDecodeBuffer = FetchDecodeBuffer.getInstance();
-
 
     //get the instruction word from the buffer
     int instruction = fetchDecodeBuffer.readInstruction();
@@ -89,7 +94,7 @@ public class DecodeStage
         break;
       //opcode did not match the opcode of a valid instruction
       default:
-        //throw new Exception("Invalid instruction!");
+        throw new Exception("Invalid instruction!");
     }
 
     outBuffer.writeIncrementedPc(fetchDecodeBuffer.readIncrementedPc());
@@ -103,13 +108,16 @@ public class DecodeStage
     outBuffer.writeRegReadValue2(registerFile.getRegister(rt));
     outBuffer.writeRt(rt);
 
+    outBuffer.writeJumpAddress(instruction & 0x0FFF);
+
     int rd = (instruction & RD_MASK) >>> 3;
     outBuffer.writeRd(rd);
 
     running = false;
+    return outBuffer;
   }
 
-  private static void setAddiControlSignals()
+  private void setAddiControlSignals()
   {
     //RegDst = 0
     outBuffer.writeRegDst(false);
@@ -135,7 +143,7 @@ public class DecodeStage
     outBuffer.writeJump(false);
   }
 
-  private static void setSltiControlSignals()
+  private void setSltiControlSignals()
   {
     //RegDst = 0
     outBuffer.writeRegDst(false);
@@ -161,7 +169,7 @@ public class DecodeStage
     outBuffer.writeJump(false);
   }
 
-  private static void setJmpControlSignals()
+  private void setJmpControlSignals()
   {
     //RegDst = X
     outBuffer.writeRegDst(false);
@@ -187,7 +195,7 @@ public class DecodeStage
     outBuffer.writeJump(true);
   }
 
-  private static void setBeqControlSignals()
+  private void setBeqControlSignals()
   {
     //RegDst = X
     outBuffer.writeRegDst(false);
@@ -213,7 +221,7 @@ public class DecodeStage
     outBuffer.writeJump(false);
   }
 
-  private static void setLwControlSignals()
+  private void setLwControlSignals()
   {
     //RegDst = 0
     outBuffer.writeRegDst(false);
@@ -239,7 +247,7 @@ public class DecodeStage
     outBuffer.writeJump(false);
   }
 
-  private static void setSwControlSignals()
+  private void setSwControlSignals()
   {
     //RegDst = X
     outBuffer.writeRegDst(false);
@@ -265,7 +273,7 @@ public class DecodeStage
     outBuffer.writeJump(false);
   }
 
-  private static void setRFormatControlSignals()
+  private void setRFormatControlSignals()
   {
     //RegDst = 1
     outBuffer.writeRegDst(true);
@@ -273,9 +281,11 @@ public class DecodeStage
     outBuffer.writeAluSrc(false);
     //MemToReg = 1
     outBuffer.writeMemToReg(false);
-    //MemRead = 0
+    //RegWrite = 1
     outBuffer.writeRegWrite(true);
     //MemWrite = 0
+    outBuffer.writeMemWrite(false);
+    //MemRead = 0
     outBuffer.writeMemRead(false);
     //Branch = 0
     outBuffer.writeBranch(false);
@@ -294,6 +304,4 @@ public class DecodeStage
   {
     DecodeStage.running = running;
   }
-
-
 }

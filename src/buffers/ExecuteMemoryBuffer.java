@@ -22,7 +22,7 @@ public class ExecuteMemoryBuffer
   private boolean jump;
   private boolean memWrite;
   private boolean memRead;
-
+  private int jumpAddress;
   //WB
   private boolean memToReg;
   private boolean regWrite;
@@ -146,5 +146,15 @@ public class ExecuteMemoryBuffer
   public void writeJump(boolean jump)
   {
     this.jump = jump;
+  }
+
+  public int readJumpAddress()
+  {
+    return jumpAddress;
+  }
+
+  public void writeJumpAddress(int jumpAddress)
+  {
+    this.jumpAddress = jumpAddress;
   }
 }

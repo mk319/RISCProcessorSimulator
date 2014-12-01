@@ -36,7 +36,7 @@ public class RegisterFile
                                                "exist" +
                                                ".");
     }
-    if(index != 0)
+    if (index != 0)
     {
       registers[index] = value;
     }

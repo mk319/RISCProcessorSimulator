@@ -1,18 +1,27 @@
 package stages;
 
+import java.util.concurrent.Callable;
+
 import buffers.DecodeExecuteBuffer;
 import buffers.ExecuteMemoryBuffer;
 import components.Alu;
 
-public class ExecutionStage
+public class ExecutionStage implements Callable<ExecuteMemoryBuffer>
 {
   private static boolean running = false;
 
-  public static void execute()
+  private final DecodeExecuteBuffer decodeExecuteBuffer;
+
+  public ExecutionStage(DecodeExecuteBuffer decodeExecuteBuffer)
+  {
+    this.decodeExecuteBuffer = decodeExecuteBuffer;
+  }
+
+  @Override
+  public ExecuteMemoryBuffer call() throws Exception
   {
     running = true;
-
-    DecodeExecuteBuffer decodeExecuteBuffer = DecodeExecuteBuffer.getInstance();
+    //TODO: Implement ExecutionStage
     ExecuteMemoryBuffer outBuffer = ExecuteMemoryBuffer.getInstance();
 
     //for testing show which instruction is being executed
@@ -23,7 +32,8 @@ public class ExecutionStage
 
     int signExtended = decodeExecuteBuffer.readSignExtendedBytes();
 
-    outBuffer.writeIncrementedPcWithOffset(incrementedPc+signExtended);
+    outBuffer.writeIncrementedPcWithOffset(incrementedPc + signExtended);
+    
     //ALU Control
     int functionCode = decodeExecuteBuffer.readSignExtendedBytes() & 0x0007;
 
@@ -44,10 +54,6 @@ public class ExecutionStage
                                               decodeExecuteBuffer.readRegReadValue2()));
     }
 
-    //write ALUZero result
-    outBuffer.writeAluZeroResult(outBuffer.readAluResult() == 0);
-
-
     //Rt or Rd
     if (decodeExecuteBuffer.readRegDst())
     {
@@ -58,15 +64,19 @@ public class ExecutionStage
       outBuffer.writeDestinationRegisterAddress(decodeExecuteBuffer.readRt());
     }
 
+    outBuffer.writeAluZeroResult(outBuffer.readAluResult() == 0);
+    outBuffer.writeRegReadValue2(decodeExecuteBuffer.readRegReadValue2());
+    outBuffer.writeBranch(decodeExecuteBuffer.readBranch());
     outBuffer.writeJump(decodeExecuteBuffer.readJump());
     outBuffer.writeMemRead(decodeExecuteBuffer.readMemRead());
     outBuffer.writeMemWrite(decodeExecuteBuffer.readMemWrite());
-    outBuffer.writeRegReadValue2(decodeExecuteBuffer.readRegReadValue2());
-    outBuffer.writeBranch(decodeExecuteBuffer.readBranch());
+
     outBuffer.writeMemToReg(decodeExecuteBuffer.readMemToReg());
     outBuffer.writeRegWrite(decodeExecuteBuffer.readRegWrite());
+    outBuffer.writeJumpAddress(decodeExecuteBuffer.readJumpAddress());
 
     running = false;
+    return outBuffer;
   }
 
   public static boolean isRunning()
@@ -78,6 +88,4 @@ public class ExecutionStage
   {
     ExecutionStage.running = running;
   }
-
-
 }

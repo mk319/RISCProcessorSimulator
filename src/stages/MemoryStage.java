@@ -4,26 +4,29 @@ import java.util.concurrent.Callable;
 
 import buffers.ExecuteMemoryBuffer;
 import buffers.MemoryWriteBackBuffer;
-import components.Cpu;
 import components.Memory;
+import components.RegisterFile;
 
-public class MemoryStage
+public class MemoryStage implements Callable<MemoryWriteBackBuffer>
 {
   private static boolean running = false;
 
-  private static ExecuteMemoryBuffer executeMemoryBuffer;
+  private final ExecuteMemoryBuffer executeMemoryBuffer;
 
-  public static void execute()
+  public MemoryStage(ExecuteMemoryBuffer executeMemoryBuffer)
+  {
+    this.executeMemoryBuffer = executeMemoryBuffer;
+  }
+
+  @Override
+  public MemoryWriteBackBuffer call() throws Exception
   {
     running = true;
-
-    executeMemoryBuffer = ExecuteMemoryBuffer.getInstance();
     MemoryWriteBackBuffer outBuffer = MemoryWriteBackBuffer.getInstance();
 
     System.out.println("MEM");
 
     Memory memory = Memory.getInstance();
-
     if (executeMemoryBuffer.readMemRead())
     {
       //read from the memory location calculated by the ALU
@@ -43,7 +46,15 @@ public class MemoryStage
     }
 
     //set PCSrc: Branch & ALUZero
-    Cpu.setPCSrc(executeMemoryBuffer.readBranch() && executeMemoryBuffer.readAluZeroResult());
+    RegisterFile registerFile = RegisterFile.getInstance();
+    if(executeMemoryBuffer.readBranch() && executeMemoryBuffer.readAluZeroResult())
+    {
+      registerFile.writePc(executeMemoryBuffer.readIncrementedPcWithOffset());
+    }
+    if(executeMemoryBuffer.readJump())
+    {
+      registerFile.writePc(executeMemoryBuffer.readJumpAddress());
+    }
 
     //pass write back stage signals on
     outBuffer.writeMemToReg(executeMemoryBuffer.readMemToReg());
@@ -52,6 +63,7 @@ public class MemoryStage
     outBuffer.writeDestinationRegisterAddress(executeMemoryBuffer.readDestinationRegisterAddress());
 
     running = false;
+    return outBuffer;
   }
 
   public static boolean isRunning()
@@ -63,6 +75,4 @@ public class MemoryStage
   {
     MemoryStage.running = running;
   }
-
-
 }
