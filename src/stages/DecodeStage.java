@@ -174,7 +174,7 @@ public class DecodeStage implements Callable<DecodeExecuteBuffer>
     //RegDst = X
     outBuffer.writeRegDst(false);
     //ALUOp1 = X
-    outBuffer.writeAluOp1(true);
+    outBuffer.writeAluOp2(true);
     //ALUOp1 = X
     outBuffer.writeAluOp1(true);
     //ALUOp0 = X
@@ -287,6 +287,8 @@ public class DecodeStage implements Callable<DecodeExecuteBuffer>
     outBuffer.writeMemWrite(false);
     //MemRead = 0
     outBuffer.writeMemRead(false);
+    
+    outBuffer.writeMemWrite(false);
     //Branch = 0
     outBuffer.writeBranch(false);
     //ALUOp2 = 1
