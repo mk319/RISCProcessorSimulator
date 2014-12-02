@@ -44,13 +44,15 @@ public class ExecutionStage implements Callable<ExecuteMemoryBuffer>
     {
       outBuffer.writeAluResult(Alu.performALU(aluControlInput,
                                               decodeExecuteBuffer.readRegReadValue1(),
-                                              decodeExecuteBuffer.readSignExtendedBytes()));
+                                              decodeExecuteBuffer.readSignExtendedBytes(),
+                                              decodeExecuteBuffer.readRt()));
     }
     else
     {
       outBuffer.writeAluResult(Alu.performALU(aluControlInput,
                                               decodeExecuteBuffer.readRegReadValue1(),
-                                              decodeExecuteBuffer.readRegReadValue2()));
+                                              decodeExecuteBuffer.readRegReadValue2(),
+                                              decodeExecuteBuffer.readRt()));
     }
 
     //Rt or Rd

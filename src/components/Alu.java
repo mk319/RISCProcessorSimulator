@@ -14,18 +14,18 @@ public class Alu
   private static final int ALU_SRL = 0b1001;
   private static final int ALU_SLT = 0b0111;
 
-  public static int performALU(int aluControlCode, int operand1, int operand2)
+  public static int performALU(int aluControlCode, int operand1, int operand2 , int rt)
   {
     switch (aluControlCode)
     {
       case ALU_SLL: //sll
-        return operand1 << 4;
+        return operand1 << rt;
 
       case ALU_SRA: //sra
-        return operand1 >> operand2;
+        return operand1 >> rt;
 
       case ALU_SRL: //srl
-        return operand1 >>> operand2;
+        return operand1 >>> rt;
 
       case ALU_AND: //and
         return operand1 & operand2;
