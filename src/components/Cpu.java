@@ -125,35 +125,21 @@ public class Cpu
     //this method assumes memory is always larger than the register file
     Memory memory = Memory.getInstance();
     RegisterFile registerFile = RegisterFile.getInstance();
-    PrintWriter writer = null;
-    try
+    System.out.print("--------------------\t\t\t"); System.out.println("--------------------");
+    System.out.print("| Memory Locations |\t\t\t"); System.out.println("|   Register File  |");
+    System.out.print("--------------------\t\t\t"); System.out.println("--------------------");
+    System.out.print("| Location | Value |\t\t\t"); System.out.println("| Location | Value |");
+    for(int i=0; i< 30;++i)
     {
-      writer = new PrintWriter("debug.log", "UTF-8");
-    writer.println("PC = " + reg.getPc());
-    writer.print("--------------------\t\t\t"); writer.println("--------------------");
-    writer.print("| Memory Locations |\t\t\t"); writer.println("|   Register File  |");
-    writer.print("--------------------\t\t\t"); writer.println("--------------------");
-    writer.print("| Location | Value |\t\t\t"); writer.println("| Location | Value |");
-    for(int i=0; i<mem.getMemorySize();++i)
-    {
-      writer.format("|     [%2x] | 0x%-4x|\t\t\t",i,memory.getMemory(i));
+      System.out.format("|     [%2x] | 0x%-4x|\t\t\t",i,memory.getMemory(i));
       if(i<registerFile.getRegisterFileSize())
       {
-        writer.format("|     [%2x] | 0x%-4x|%n",i,registerFile.getRegister(i));
+        System.out.format("|     [%2x] | 0x%-4x|%n",i,registerFile.getRegister(i));
       }
       else
       {
-        writer.format("%n");
+        System.out.format("%n");
       }
-    }
-
-    } catch (FileNotFoundException | UnsupportedEncodingException e)
-    {
-      e.printStackTrace();
-    } finally
-    {
-      if(writer != null)
-      writer.close();
     }
   }
 

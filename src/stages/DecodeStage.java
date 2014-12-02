@@ -51,8 +51,8 @@ public class DecodeStage implements Callable<DecodeExecuteBuffer>
     int opCode = (OPCODE_MASK & instruction) >> 12;
 
     //for testing show which instruction is being executed
-    System.out.println("DEC: " + Integer.toHexString(opCode) + "\t\t\t" + String
-            .format("%16s", Integer.toBinaryString(instruction)).replace(' ', '0'));
+    //System.out.println("DEC: " + Integer.toHexString(opCode) + "\t\t\t" + String
+   //         .format("%16s", Integer.toBinaryString(instruction)).replace(' ', '0'));
 
     //set control signals based on instruction type
     switch (opCode)

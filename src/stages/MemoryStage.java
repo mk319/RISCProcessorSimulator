@@ -24,7 +24,7 @@ public class MemoryStage implements Callable<MemoryWriteBackBuffer>
     running = true;
     MemoryWriteBackBuffer outBuffer = MemoryWriteBackBuffer.getInstance();
 
-    System.out.println("MEM");
+    //System.out.println("MEM");
 
     Memory memory = Memory.getInstance();
     if (executeMemoryBuffer.readMemRead())

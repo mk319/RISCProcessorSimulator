@@ -24,7 +24,7 @@ public class ExecutionStage implements Callable<ExecuteMemoryBuffer>
     ExecuteMemoryBuffer outBuffer = ExecuteMemoryBuffer.getInstance();
 
     //for testing show which instruction is being executed
-    System.out.println("EXE");
+   // System.out.println("EXE");
 
     //PC: Need to do offset
     int incrementedPc = decodeExecuteBuffer.readIncrementedPc();

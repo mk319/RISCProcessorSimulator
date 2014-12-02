@@ -20,7 +20,7 @@ public class WriteBackStage implements Callable<Void>
   public Void call() throws Exception
   {
     running = true;
-    System.out.println("WB");
+    //System.out.println("WB");
     if(memoryWriteBackBuffer.readRegWrite())
     {
       RegisterFile registerFile = RegisterFile.getInstance();
